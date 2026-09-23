@@ -1,0 +1,220 @@
+import { ConjunctionEvent } from '../types/conjunction';
+
+export const PREDEFINED_CONJUNCTION_EVENTS: ConjunctionEvent[] = [
+  {
+    id: 'evt-001',
+    eventCode: 'CONJ-2026-842-SL16',
+    primaryObject: {
+      id: 'sat-oneweb-840',
+      name: 'Commercial LEO Sat (OneWeb/Telecom)',
+      noradId: 45132,
+      type: 'payload',
+      status: 'active',
+      operator: 'Global Telecom Constellation',
+      massKg: 150,
+      country: 'International',
+      isManeuverable: true
+    },
+    secondaryObject: {
+      id: 'deb-sl16-rb',
+      name: 'SL-16 Derelict Rocket Body (Zenit-2)',
+      noradId: 22676,
+      type: 'rocket_body',
+      status: 'derelict',
+      operator: 'Defunct Soviet / Roscosmos',
+      massKg: 9000,
+      country: 'CIS',
+      isManeuverable: false
+    },
+    altitudeKm: 842,
+    missDistanceM: 112,
+    relativeVelocityKms: 14.2,
+    collisionProbability: 3.8e-4, // Moderate Pc, would be ranked ~3rd or 4th in traditional systems
+    timeToClosestApproachHours: 32.5,
+    tleAgeDays: 0.6,
+    inclinationDeg: 86.4,
+    shellBandName: 'Sun-Synchronous Orbit (SSO) Polar Band',
+    description: 'Catastrophic collision risk: 9-ton derelict upper stage intersecting commercial constellation at 14.2 km/s in the most densely packed polar orbit.',
+    tag: 'Commercial'
+  },
+  {
+    id: 'evt-002',
+    eventCode: 'CONJ-2026-310-CUBESATS',
+    primaryObject: {
+      id: 'sat-edusat-1',
+      name: 'EduSat-3U (University Tech Demo)',
+      noradId: 58921,
+      type: 'cubesat',
+      status: 'active',
+      operator: 'Academic Consortium',
+      massKg: 4,
+      country: 'Global',
+      isManeuverable: false
+    },
+    secondaryObject: {
+      id: 'sat-nanosat-b',
+      name: 'AeroCube-11 Research CubeSat',
+      noradId: 57402,
+      type: 'cubesat',
+      status: 'active',
+      operator: 'University Lab',
+      massKg: 4,
+      country: 'USA',
+      isManeuverable: false
+    },
+    altitudeKm: 310,
+    missDistanceM: 45,
+    relativeVelocityKms: 4.8,
+    collisionProbability: 4.2e-3, // VERY HIGH Pc! Legacy systems rank this #1 threat
+    timeToClosestApproachHours: 14.2,
+    tleAgeDays: 0.3,
+    inclinationDeg: 51.6,
+    shellBandName: 'Decaying Very Low Earth Orbit (VLEO)',
+    description: 'Legacy False-Alarm: Two tiny CubeSats in decaying orbit. Legacy Pc ranks this as TOP threat, but combined mass is only 8kg and fragments burn up within 3 months.',
+    tag: 'Commercial'
+  },
+  {
+    id: 'evt-003',
+    eventCode: 'CONJ-2026-505-ISRO-CARTOSAT',
+    primaryObject: {
+      id: 'sat-cartosat-2f',
+      name: 'Cartosat-2F (ISRO Earth Observation)',
+      noradId: 43111,
+      type: 'payload',
+      status: 'active',
+      operator: 'ISRO (India)',
+      massKg: 710,
+      country: 'India',
+      isManeuverable: true
+    },
+    secondaryObject: {
+      id: 'deb-kosmos-2251',
+      name: 'Kosmos-2251 Shrapnel Debris',
+      noradId: 34182,
+      type: 'debris',
+      status: 'derelict',
+      operator: 'Historical Anti-Satellite / Collision',
+      massKg: 22,
+      country: 'Russia',
+      isManeuverable: false
+    },
+    altitudeKm: 505,
+    missDistanceM: 175,
+    relativeVelocityKms: 11.8,
+    collisionProbability: 6.5e-4,
+    timeToClosestApproachHours: 41.0,
+    tleAgeDays: 0.9,
+    inclinationDeg: 97.5,
+    shellBandName: 'ISRO Sun-Synchronous Imagery Band',
+    description: 'National Asset Protection: High-value Indian remote sensing spacecraft facing hypervelocity fragment from the famous 2009 Kosmos collision.',
+    tag: 'ISRO'
+  },
+  {
+    id: 'evt-004',
+    eventCode: 'CONJ-2026-550-STARLINK',
+    primaryObject: {
+      id: 'sat-starlink-3841',
+      name: 'Starlink-3841 (SpaceX)',
+      noradId: 52189,
+      type: 'payload',
+      status: 'active',
+      operator: 'SpaceX',
+      massKg: 260,
+      country: 'USA',
+      isManeuverable: true
+    },
+    secondaryObject: {
+      id: 'deb-fengyun-1c',
+      name: 'Fengyun-1C Anti-Satellite Debris',
+      noradId: 31204,
+      type: 'debris',
+      status: 'derelict',
+      operator: 'Historical ASAT Test Debris',
+      massKg: 14,
+      country: 'China',
+      isManeuverable: false
+    },
+    altitudeKm: 550,
+    missDistanceM: 92,
+    relativeVelocityKms: 13.9,
+    collisionProbability: 1.1e-3,
+    timeToClosestApproachHours: 22.8,
+    tleAgeDays: 0.4,
+    inclinationDeg: 53.2,
+    shellBandName: 'Mega-Constellation Core Shell (550 km)',
+    description: 'High Traffic Encounter: Starlink satellite in the crowded 550 km shell near ASAT debris. Requires immediate automated ion engine thruster avoidance firing.',
+    tag: 'Starlink'
+  },
+  {
+    id: 'evt-005',
+    eventCode: 'CONJ-2026-418-ISS',
+    primaryObject: {
+      id: 'sat-iss',
+      name: 'International Space Station (ISS)',
+      noradId: 25544,
+      type: 'crewed',
+      status: 'active',
+      operator: 'NASA / ESA / JAXA / CSA / Roscosmos',
+      massKg: 420000,
+      country: 'International',
+      isManeuverable: true
+    },
+    secondaryObject: {
+      id: 'deb-centaur-frag',
+      name: 'Centaur Upper Stage Fragment',
+      noradId: 28419,
+      type: 'debris',
+      status: 'derelict',
+      operator: 'Legacy Launch Debris',
+      massKg: 35,
+      country: 'USA',
+      isManeuverable: false
+    },
+    altitudeKm: 418,
+    missDistanceM: 740,
+    relativeVelocityKms: 9.6,
+    collisionProbability: 8.2e-5,
+    timeToClosestApproachHours: 48.0,
+    tleAgeDays: 0.5,
+    inclinationDeg: 51.6,
+    shellBandName: 'Crewed Habitation Orbit (418 km)',
+    description: 'Crewed Flight Safety: Critical human habitat threshold. Strict protocol dictates a Pre-Determined Debris Avoidance Maneuver (PDAM) if miss distance drops under 1 km.',
+    tag: 'ISS'
+  },
+  {
+    id: 'evt-006',
+    eventCode: 'CONJ-2026-960-DERELICT-DERELICT',
+    primaryObject: {
+      id: 'sat-cosmos-1484',
+      name: 'Kosmos-1484 (Defunct Observation Sat)',
+      noradId: 14207,
+      type: 'payload',
+      status: 'derelict',
+      operator: 'Defunct USSR',
+      massKg: 2500,
+      country: 'CIS',
+      isManeuverable: false
+    },
+    secondaryObject: {
+      id: 'deb-thor-delta-rb',
+      name: 'Thor-Delta Second Stage Rocket Body',
+      noradId: 10642,
+      type: 'rocket_body',
+      status: 'derelict',
+      operator: 'Legacy Delta Rocket',
+      massKg: 1200,
+      country: 'USA',
+      isManeuverable: false
+    },
+    altitudeKm: 960,
+    missDistanceM: 280,
+    relativeVelocityKms: 10.4,
+    collisionProbability: 2.1e-4,
+    timeToClosestApproachHours: 58.0,
+    tleAgeDays: 1.2,
+    inclinationDeg: 98.2,
+    shellBandName: 'Upper Polar Debris Graveyard',
+    description: 'Unmitigated Ghost Encounter: Two dead, unmaneuverable multi-ton steel/aluminum relics. Neither can maneuver; at 960 km, resulting fragments would orbit for 300+ years.',
+    tag: 'Derelict'
+  }
+];
