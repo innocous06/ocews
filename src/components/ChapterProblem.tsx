@@ -1,21 +1,25 @@
 import React from 'react';
 import { ProblemIllustration } from './illustrations/ProblemIllustration';
 
-export const ChapterProblem: React.FC = () => {
+interface ChapterProblemProps {
+  theme?: 'light' | 'dark';
+}
+
+export const ChapterProblem: React.FC<ChapterProblemProps> = ({ theme = 'dark' }) => {
   return (
-    <section id="problem" className="py-12 border-t border-neutral-900 max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="problem" className="py-12 border-t border-neutral-200 dark:border-neutral-900 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Chapter Marker */}
-      <div className="flex items-center gap-2 text-xs font-mono text-amber-400 mb-2">
+      <div className="flex items-center gap-2 text-xs font-mono text-amber-600 dark:text-amber-400 mb-2">
         <span className="font-bold">01</span>
         <span>/</span>
         <span className="uppercase tracking-widest">THE PROBLEM</span>
       </div>
 
-      <h2 className="text-2xl sm:text-4xl font-serif text-neutral-100 max-w-3xl leading-snug">
+      <h2 className="text-2xl sm:text-4xl font-serif text-neutral-900 dark:text-neutral-100 max-w-3xl leading-snug">
         Alert fatigue in an exponentially crowded sky.
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-6 text-sm text-neutral-400 font-serif leading-relaxed">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-6 text-sm text-neutral-600 dark:text-neutral-400 font-serif leading-relaxed">
         <div>
           <p className="mb-4">
             Today, over 40,000 artificial objects larger than 10 cm are cataloged in Earth orbit, alongside an estimated 100 million untracked millimeter-to-centimeter fragments. With mega-constellation launch cadences accelerating monthly, orbital spatial density has reached a historic critical juncture.
@@ -35,7 +39,7 @@ export const ChapterProblem: React.FC = () => {
       </div>
 
       {/* Vector Illustration */}
-      <ProblemIllustration />
+      <ProblemIllustration theme={theme} />
     </section>
   );
 };

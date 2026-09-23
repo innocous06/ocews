@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PREDEFINED_CONJUNCTION_EVENTS } from './data/predefinedEvents';
 import { evaluateAndRankEvents } from './logic/consequenceEngine';
 import { EvaluatedConjunction } from './types/conjunction';
@@ -15,6 +15,28 @@ import { EditorialFooter } from './components/EditorialFooter';
 import { ConsequenceInspector } from './components/ConsequenceInspector';
 
 export const App: React.FC = () => {
+  // Theme state: defaults to 'dark', switchable to 'light'
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('ocews-theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return 'dark'; // default
+  });
+
+  // Sync theme with <html> class
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('ocews-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   // Pre-evaluated conjunction events
   const evaluatedEvents = useMemo(() => {
     return evaluateAndRankEvents(PREDEFINED_CONJUNCTION_EVENTS);
@@ -30,23 +52,27 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#ededed] flex flex-col font-sans selection:bg-amber-400 selection:text-black">
-      {/* Editorial Masthead */}
-      <EditorialHeader onScrollTo={handleScrollTo} />
+    <div className="min-h-screen bg-paper-100 dark:bg-[#050505] text-neutral-900 dark:text-[#ededed] flex flex-col font-sans selection:bg-amber-400 selection:text-black transition-colors duration-200">
+      {/* Editorial Masthead with Theme Toggle */}
+      <EditorialHeader
+        onScrollTo={handleScrollTo}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
 
       {/* Main Narrative Flow */}
       <main className="flex-1 w-full">
         {/* Hero Section */}
-        <EditorialHero />
+        <EditorialHero theme={theme} />
 
         {/* Chapter 01: The Problem */}
-        <ChapterProblem />
+        <ChapterProblem theme={theme} />
 
         {/* Chapter 02: The Blindspot */}
-        <ChapterBlindspot />
+        <ChapterBlindspot theme={theme} />
 
         {/* Chapter 03: The Physics & Math */}
-        <ChapterPhysics />
+        <ChapterPhysics theme={theme} />
 
         {/* Chapter 04: The Live Logic Demonstrator */}
         <ChapterInteractiveDemo
@@ -55,7 +81,7 @@ export const App: React.FC = () => {
         />
 
         {/* Chapter 05: Actionable Astrodynamics (Maneuver) */}
-        <ChapterManeuver />
+        <ChapterManeuver theme={theme} />
 
         {/* Chapter 06: Evaluator Sandbox */}
         <ChapterSandbox />

@@ -1,21 +1,25 @@
 import React from 'react';
 import { BreakupPhysicsIllustration } from './illustrations/BreakupPhysicsIllustration';
 
-export const ChapterPhysics: React.FC = () => {
+interface ChapterPhysicsProps {
+  theme?: 'light' | 'dark';
+}
+
+export const ChapterPhysics: React.FC<ChapterPhysicsProps> = ({ theme = 'dark' }) => {
   return (
-    <section id="physics" className="py-12 border-t border-neutral-900 max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="physics" className="py-12 border-t border-neutral-200 dark:border-neutral-900 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Chapter Marker */}
-      <div className="flex items-center gap-2 text-xs font-mono text-amber-400 mb-2">
+      <div className="flex items-center gap-2 text-xs font-mono text-amber-600 dark:text-amber-400 mb-2">
         <span className="font-bold">03</span>
         <span>/</span>
         <span className="uppercase tracking-widest">THE MATHEMATICS & FORMULATION</span>
       </div>
 
-      <h2 className="text-2xl sm:text-4xl font-serif text-neutral-100 max-w-3xl leading-snug">
+      <h2 className="text-2xl sm:text-4xl font-serif text-neutral-900 dark:text-neutral-100 max-w-3xl leading-snug">
         Why not machine learning? Transparent physics-based scoring.
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-6 text-sm text-neutral-400 font-serif leading-relaxed">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-6 text-sm text-neutral-600 dark:text-neutral-400 font-serif leading-relaxed">
         <div>
           <p className="mb-4">
             A common hackathon suggestion is training a machine learning classifier on conjunction records. We explicitly rejected this approach: catastrophic satellite collisions in spaceflight history number in the single digits (Iridium 33 and Kosmos 2251 in 2009; Kosmos 1408 ASAT). There is no statistically valid training distribution of catastrophic collisions.
@@ -35,7 +39,7 @@ export const ChapterPhysics: React.FC = () => {
       </div>
 
       {/* Physics Illustration & Formula Cards */}
-      <BreakupPhysicsIllustration />
+      <BreakupPhysicsIllustration theme={theme} />
     </section>
   );
 };

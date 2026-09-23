@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-[#050505] text-[#ededed] font-sans selection:bg-amber-400 selection:text-black;
+    @apply bg-paper-100 text-neutral-900 dark:bg-[#050505] dark:text-[#ededed] font-sans selection:bg-amber-400 selection:text-black transition-colors duration-200;
   }
 
   h1, h2, h3, .font-serif-title {
@@ -15,12 +15,16 @@
 /* Subtle editorial paper grain & rule lines */
 .editorial-rule {
   height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1) 15%, rgba(0, 0, 0, 0.1) 85%, transparent);
+}
+
+.dark .editorial-rule {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12) 15%, rgba(255, 255, 255, 0.12) 85%, transparent);
 }
 
 .editorial-rule-amber {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.3) 15%, rgba(245, 158, 11, 0.3) 85%, transparent);
+  background: linear-gradient(90deg, transparent, rgba(217, 119, 6, 0.3) 15%, rgba(217, 119, 6, 0.3) 85%, transparent);
 }
 
 /* Custom minimal scrollbar */
@@ -29,11 +33,14 @@
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #070708;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #d4d4d8;
   border-radius: 2px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #d97706;
