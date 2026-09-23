@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-paper-100 text-neutral-900 dark:bg-[#050505] dark:text-[#ededed] font-sans selection:bg-amber-400 selection:text-black transition-colors duration-200;
+    @apply bg-paper-100 text-neutral-900 font-sans selection:bg-amber-400 selection:text-black;
   }
 
   h1, h2, h3, .font-serif-title {
@@ -16,10 +16,6 @@
 .editorial-rule {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1) 15%, rgba(0, 0, 0, 0.1) 85%, transparent);
-}
-
-.dark .editorial-rule {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12) 15%, rgba(255, 255, 255, 0.12) 85%, transparent);
 }
 
 .editorial-rule-amber {
@@ -38,9 +34,6 @@
 ::-webkit-scrollbar-thumb {
   background: #d4d4d8;
   border-radius: 2px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #27272a;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #d97706;

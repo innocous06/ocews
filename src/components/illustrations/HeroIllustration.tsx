@@ -1,205 +1,313 @@
 import React, { useState } from 'react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 
-interface HeroIllustrationProps {
-  theme?: 'light' | 'dark';
-}
-
-export const HeroIllustration: React.FC<HeroIllustrationProps> = ({ theme = 'dark' }) => {
+export const HeroIllustration: React.FC = () => {
   const [activeShell, setActiveShell] = useState<number | null>(null);
-  const isLight = theme === 'light';
+  const [debrisDensity, setDebrisDensity] = useState<number>(30); // 10 to 60 debris dots
+  const [tcaHours, setTcaHours] = useState<number>(12); // 36 to 0 hours
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
-  // Theme-aware colors
-  const strokeColor = isLight ? '#71717a' : '#52525b';
-  const mutedStroke = isLight ? '#e4e4e7' : '#27272a';
-  const textColor = isLight ? '#18181b' : '#fafafa';
-  const secondaryText = isLight ? '#52525b' : '#a1a1aa';
-  const tertiaryText = isLight ? '#a1a1aa' : '#71717a';
-  const amberColor = isLight ? '#d97706' : '#f59e0b';
-  const amberBright = isLight ? '#b45309' : '#fbbf24';
-  const cardFill = isLight ? '#ffffff' : '#09090b';
+  // Play animation timer
+  React.useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setTcaHours(prev => {
+          if (prev <= 0.5) {
+            setIsPlaying(false);
+            return 0;
+          }
+          return parseFloat((prev - 0.5).toFixed(1));
+        });
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  // Positions of the two craft parameterized by tcaHours (36h -> 0h)
+  // At 0h they are at conjunction point (415, 195)
+  const progress = 1 - tcaHours / 36; // 0 to 1
+  const sat1X = 240 + progress * (415 - 240);
+  const sat1Y = 280 - progress * (280 - 195);
+
+  const sat2X = 500 - progress * (500 - 415);
+  const sat2Y = 120 + progress * (195 - 120);
+
+  const currentMissM = Math.round(112 + (1 - progress) * 14200);
+
+  // Generate debris particles deterministically
+  const debrisParticles = Array.from({ length: debrisDensity }, (_, i) => {
+    const angle = (i * 360) / debrisDensity;
+    const radiusX = 120 + (i % 3) * 55 + (i * 7) % 20;
+    const radiusY = 80 + (i % 3) * 35 + (i * 5) % 15;
+    const rad = (angle * Math.PI) / 180;
+    const cx = Math.round(400 + radiusX * Math.cos(rad));
+    const cy = Math.round(250 + radiusY * Math.sin(rad));
+    return { cx, cy, r: (i % 3 === 0 ? 1.8 : 1.2) };
+  });
 
   return (
-    <div className="relative w-full aspect-[16/10] max-w-4xl mx-auto flex items-center justify-center select-none overflow-hidden my-4 sm:my-8 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-obsidian-950 rounded-2xl p-4 sm:p-6 shadow-sm transition-colors duration-200">
-      {/* Background celestial coordinate grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(#d4d4d8_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
+    <div className="border border-neutral-200 bg-white rounded-2xl p-5 sm:p-6 my-6 shadow-sm select-none font-mono">
+      {/* Interactive Controls Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-neutral-200 text-xs">
+        {/* Shell Filter */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-neutral-500 uppercase text-[10px] tracking-wider">SHELL FILTER:</span>
+          {[
+            { label: 'All Shells', val: null },
+            { label: '310 km VLEO', val: 310 },
+            { label: '550 km Mega-Constellation', val: 550 },
+            { label: '840 km SSO Polar', val: 840 },
+          ].map(s => (
+            <button
+              key={s.label}
+              onClick={() => setActiveShell(s.val)}
+              className={`px-2.5 py-1 rounded text-[11px] transition-colors ${
+                activeShell === s.val
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300 font-bold'
+                  : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 border border-neutral-200'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
 
-      {/* SVG Vector Drawing */}
-      <svg
-        viewBox="0 0 800 500"
-        className="w-full h-full relative z-10 font-mono"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <radialGradient id="earthGradDynamic" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={isLight ? '#f4f4f5' : '#18181b'} />
-            <stop offset="75%" stopColor={isLight ? '#e4e4e7' : '#09090b'} />
-            <stop offset="100%" stopColor={isLight ? '#d4d4d8' : '#030303'} />
-          </radialGradient>
-        </defs>
+        {/* Play / Pause / Reset for Time Scrubbing */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 text-white text-[11px] font-mono transition-colors"
+          >
+            {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+            <span>{isPlaying ? 'Pause' : 'Simulate TCA'}</span>
+          </button>
+          <button
+            onClick={() => {
+              setIsPlaying(false);
+              setTcaHours(36);
+            }}
+            title="Reset to T-36 hours"
+            className="p-1 rounded border border-neutral-200 hover:bg-neutral-100 text-neutral-600 transition-colors"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
 
-        {/* Outer Coordinate Rings */}
-        <circle cx="400" cy="250" r="235" stroke={mutedStroke} strokeWidth="0.75" strokeDasharray="3 4" />
-        <circle cx="400" cy="250" r="185" stroke={mutedStroke} strokeWidth="0.75" strokeDasharray="2 3" />
-        <circle cx="400" cy="250" r="135" stroke={mutedStroke} strokeWidth="0.75" strokeDasharray="1 2" />
+      {/* Scrubbing Sliders */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 mb-3 border-b border-neutral-100 text-[11px]">
+        {/* Time Scrubbing Slider */}
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <span className="text-neutral-500">TIME TO CLOSEST APPROACH (TCA):</span>
+            <span className="text-amber-700 font-bold">{tcaHours.toFixed(1)} hrs remaining</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="36"
+            step="0.5"
+            value={36 - tcaHours}
+            onChange={(e) => {
+              setIsPlaying(false);
+              setTcaHours(36 - parseFloat(e.target.value));
+            }}
+            className="w-full accent-amber-600 h-1 bg-neutral-200 rounded cursor-pointer"
+          />
+          <div className="flex justify-between text-[10px] text-neutral-400">
+            <span>T-36h (Far)</span>
+            <span>T-18h</span>
+            <span>T-0h (TCA Node)</span>
+          </div>
+        </div>
 
-        {/* Shell 3: Sun-Synchronous Polar Choke (840 km) */}
-        <ellipse
-          cx="400"
-          cy="250"
-          rx="235"
-          ry="150"
-          stroke={activeShell === 840 ? amberColor : strokeColor}
-          strokeWidth={activeShell === 840 ? '1.6' : '1'}
-          strokeDasharray="4 4"
-          className="cursor-pointer transition-colors duration-200"
-          onMouseEnter={() => setActiveShell(840)}
-          onMouseLeave={() => setActiveShell(null)}
-        />
-        <text x="645" y="246" fill={secondaryText} fontSize="9" letterSpacing="0.05em">
-          SSO SHELL (840 KM)
-        </text>
+        {/* Debris Density Slider */}
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <span className="text-neutral-500">SIMULATED DEBRIS DENSITY:</span>
+            <span className="text-neutral-800 font-bold">{debrisDensity * 120} tracked fragments</span>
+          </div>
+          <input
+            type="range"
+            min="10"
+            max="60"
+            step="5"
+            value={debrisDensity}
+            onChange={(e) => setDebrisDensity(parseInt(e.target.value))}
+            className="w-full accent-neutral-800 h-1 bg-neutral-200 rounded cursor-pointer"
+          />
+          <div className="flex justify-between text-[10px] text-neutral-400">
+            <span>Nominal (1,200)</span>
+            <span>Standard (3,600)</span>
+            <span>Dense Catalog (7,200)</span>
+          </div>
+        </div>
+      </div>
 
-        {/* Shell 2: Mega-Constellation Band (550 km) */}
-        <ellipse
-          cx="400"
-          cy="250"
-          rx="185"
-          ry="115"
-          stroke={activeShell === 550 ? amberColor : strokeColor}
-          strokeWidth={activeShell === 550 ? '1.6' : '1'}
-          className="cursor-pointer transition-colors duration-200"
-          onMouseEnter={() => setActiveShell(550)}
-          onMouseLeave={() => setActiveShell(null)}
-        />
-        <text x="590" y="278" fill={tertiaryText} fontSize="8.5">
-          MEGA-CONSTELLATION (550 KM)
-        </text>
+      {/* SVG Canvas */}
+      <div className="relative w-full aspect-[16/10] max-w-4xl mx-auto flex items-center justify-center overflow-hidden">
+        <svg
+          viewBox="0 0 800 500"
+          className="w-full h-full relative z-10 font-mono"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <radialGradient id="earthGradLight" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="65%" stopColor="#f4f4f5" />
+              <stop offset="100%" stopColor="#e4e4e7" />
+            </radialGradient>
+          </defs>
 
-        {/* Shell 1: Decaying VLEO (310 km) */}
-        <ellipse
-          cx="400"
-          cy="250"
-          rx="135"
-          ry="85"
-          stroke={activeShell === 310 ? amberColor : strokeColor}
-          strokeWidth="0.8"
-          strokeDasharray="2 2"
-          className="cursor-pointer transition-colors duration-200"
-          onMouseEnter={() => setActiveShell(310)}
-          onMouseLeave={() => setActiveShell(null)}
-        />
-        <text x="540" y="210" fill={tertiaryText} fontSize="8">
-          VLEO DECAY (310 KM)
-        </text>
+          {/* Coordinate grid rings */}
+          <circle cx="400" cy="250" r="235" stroke="#e4e4e7" strokeWidth="0.75" strokeDasharray="3 4" />
+          <circle cx="400" cy="250" r="185" stroke="#e4e4e7" strokeWidth="0.75" strokeDasharray="2 3" />
+          <circle cx="400" cy="250" r="135" stroke="#e4e4e7" strokeWidth="0.75" strokeDasharray="1 2" />
 
-        {/* Central Earth Globe Sphere */}
-        <g>
+          {/* Shell 3: Sun-Synchronous Polar Choke (840 km) */}
+          <ellipse
+            cx="400"
+            cy="250"
+            rx="235"
+            ry="150"
+            stroke={activeShell === 840 ? '#d97706' : '#a1a1aa'}
+            strokeWidth={activeShell === 840 ? '1.8' : '1'}
+            strokeDasharray="4 4"
+            className="cursor-pointer transition-colors duration-200"
+            onClick={() => setActiveShell(activeShell === 840 ? null : 840)}
+          />
+          <text x="645" y="246" fill="#71717a" fontSize="9" letterSpacing="0.05em">
+            SSO SHELL (840 KM)
+          </text>
+
+          {/* Shell 2: Mega-Constellation Band (550 km) */}
+          <ellipse
+            cx="400"
+            cy="250"
+            rx="185"
+            ry="115"
+            stroke={activeShell === 550 ? '#d97706' : '#a1a1aa'}
+            strokeWidth={activeShell === 550 ? '1.8' : '1'}
+            className="cursor-pointer transition-colors duration-200"
+            onClick={() => setActiveShell(activeShell === 550 ? null : 550)}
+          />
+          <text x="590" y="278" fill="#71717a" fontSize="8.5">
+            MEGA-CONSTELLATION (550 KM)
+          </text>
+
+          {/* Shell 1: Decaying VLEO (310 km) */}
+          <ellipse
+            cx="400"
+            cy="250"
+            rx="135"
+            ry="85"
+            stroke={activeShell === 310 ? '#d97706' : '#a1a1aa'}
+            strokeWidth="0.8"
+            strokeDasharray="2 2"
+            className="cursor-pointer transition-colors duration-200"
+            onClick={() => setActiveShell(activeShell === 310 ? null : 310)}
+          />
+          <text x="540" y="210" fill="#a1a1aa" fontSize="8">
+            VLEO DECAY (310 KM)
+          </text>
+
           {/* Earth Body */}
-          <circle cx="400" cy="250" r="70" fill="url(#earthGradDynamic)" stroke={textColor} strokeWidth="1.2" />
+          <g>
+            <circle cx="400" cy="250" r="70" fill="url(#earthGradLight)" stroke="#18181b" strokeWidth="1.2" />
+            <circle cx="400" cy="250" r="76" stroke="#71717a" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6" />
+
+            {/* Latitude & Longitude lines */}
+            <ellipse cx="400" cy="250" rx="70" ry="24" stroke="#a1a1aa" strokeWidth="0.6" strokeDasharray="2 2" />
+            <ellipse cx="400" cy="250" rx="70" ry="48" stroke="#d4d4d8" strokeWidth="0.5" />
+            <ellipse cx="400" cy="250" rx="30" ry="70" stroke="#a1a1aa" strokeWidth="0.6" />
+            <line x1="400" y1="180" x2="400" y2="320" stroke="#71717a" strokeWidth="0.75" />
+            <line x1="330" y1="250" x2="470" y2="250" stroke="#71717a" strokeWidth="0.75" />
+
+            <text x="400" y="253" fill="#18181b" fontSize="10" textAnchor="middle" letterSpacing="0.2em" fontWeight="bold">
+              TERRA
+            </text>
+            <text x="400" y="265" fill="#71717a" fontSize="7.5" textAnchor="middle">
+              R = 6,371 KM
+            </text>
+          </g>
+
+          {/* Floating Debris Cloud (Generated deterministically from density slider) */}
+          {debrisParticles.map((d, i) => (
+            <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill={i % 4 === 0 ? '#d97706' : '#71717a'} />
+          ))}
+
+          {/* Trajectory Arc A: Primary Craft Track (Black line) */}
+          <path
+            d="M 220 320 Q 320 180 500 160"
+            stroke="#18181b"
+            strokeWidth="1.2"
+            strokeDasharray="4 2"
+            fill="none"
+          />
+
+          {/* Trajectory Arc B: Intersecting Debris Track (Amber line) */}
+          <path
+            d="M 520 100 Q 430 190 310 290"
+            stroke="#d97706"
+            strokeWidth="1.4"
+            fill="none"
+          />
+
+          {/* Conjunction Point TCA Intersection (415, 195) */}
+          <g transform="translate(415, 195)">
+            <circle cx="0" cy="0" r="14" stroke="#d97706" strokeWidth="0.8" strokeDasharray="3 3" />
+            <circle cx="0" cy="0" r="6" fill="#d97706" fillOpacity="0.2" />
+            <circle cx="0" cy="0" r="2.5" fill="#b45309" />
+          </g>
+
+          {/* Dynamic Moving Primary Satellite (X: sat1X, Y: sat1Y) */}
+          <g transform={`translate(${sat1X}, ${sat1Y})`}>
+            <rect x="-6" y="-3" width="12" height="6" fill="#ffffff" stroke="#18181b" strokeWidth="0.8" />
+            <line x1="-12" y1="0" x2="-6" y2="0" stroke="#d97706" strokeWidth="0.8" />
+            <line x1="6" y1="0" x2="12" y2="0" stroke="#d97706" strokeWidth="0.8" />
+            <text x="-25" y="-8" fill="#18181b" fontSize="8" fontWeight="bold">
+              ONEWEB-SAT
+            </text>
+          </g>
+
+          {/* Dynamic Moving Zenit Rocket Body (X: sat2X, Y: sat2Y) */}
+          <g transform={`translate(${sat2X}, ${sat2Y}) rotate(-35)`}>
+            <rect x="-12" y="-4" width="24" height="8" rx="1.5" fill="#ffffff" stroke="#d97706" strokeWidth="1.2" />
+            <line x1="-4" y1="-4" x2="-4" y2="4" stroke="#a1a1aa" strokeWidth="0.5" />
+            <line x1="4" y1="-4" x2="4" y2="4" stroke="#a1a1aa" strokeWidth="0.5" />
+            <polygon points="12,-4 16,-6 16,6 12,4" fill="none" stroke="#d97706" strokeWidth="0.8" />
+            <text x="-20" y="16" fill="#d97706" fontSize="7.5" fontWeight="bold">
+              SL-16 (9T)
+            </text>
+          </g>
+
+          {/* Range Caliper between the two closing objects */}
+          <line x1={sat1X} y1={sat1Y} x2={sat2X} y2={sat2Y} stroke="#ef4444" strokeWidth="0.8" strokeDasharray="2 2" />
           
-          {/* Atmospheric boundary ring */}
-          <circle cx="400" cy="250" r="76" stroke={strokeColor} strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6" />
+          {/* Dynamic Metadata Card attached to midpoint */}
+          <g transform={`translate(${(sat1X + sat2X) / 2 + 15}, ${(sat1Y + sat2Y) / 2 - 30})`}>
+            <rect x="0" y="0" width="160" height="38" fill="#ffffff" stroke="#d97706" strokeWidth="0.8" rx="2" />
+            <text x="8" y="14" fill="#b45309" fontSize="8" fontWeight="bold">
+              CLOSING: {currentMissM.toLocaleString()} M
+            </text>
+            <text x="8" y="24" fill="#18181b" fontSize="7.5">
+              CLOSING SPEED: 14.2 KM/S
+            </text>
+            <text x="8" y="32" fill="#71717a" fontSize="6.5">
+              TCA IN {tcaHours.toFixed(1)} HOURS
+            </text>
+          </g>
 
-          {/* Latitude & Longitude Linework */}
-          <ellipse cx="400" cy="250" rx="70" ry="24" stroke={strokeColor} strokeWidth="0.6" strokeDasharray="2 2" />
-          <ellipse cx="400" cy="250" rx="70" ry="48" stroke={mutedStroke} strokeWidth="0.5" />
-          <ellipse cx="400" cy="250" rx="30" ry="70" stroke={strokeColor} strokeWidth="0.6" />
-          <line x1="400" y1="180" x2="400" y2="320" stroke={strokeColor} strokeWidth="0.75" />
-          <line x1="330" y1="250" x2="470" y2="250" stroke={strokeColor} strokeWidth="0.75" />
-
-          {/* Earth Label */}
-          <text x="400" y="253" fill={textColor} fontSize="10" textAnchor="middle" letterSpacing="0.2em" fontWeight="bold">
-            TERRA
-          </text>
-          <text x="400" y="265" fill={secondaryText} fontSize="7.5" textAnchor="middle">
-            R = 6,371 KM
-          </text>
-        </g>
-
-        {/* Floating Debris Particles */}
-        <circle cx="210" cy="180" r="1.5" fill={textColor} />
-        <circle cx="225" cy="172" r="1" fill={secondaryText} />
-        <circle cx="240" cy="195" r="2" fill={secondaryText} />
-        <circle cx="280" cy="140" r="1.5" fill={textColor} />
-        <circle cx="310" cy="120" r="1" fill={tertiaryText} />
-        <circle cx="490" cy="130" r="1.5" fill={textColor} />
-        <circle cx="530" cy="160" r="2" fill={secondaryText} />
-        <circle cx="580" cy="220" r="1.5" fill={textColor} />
-        <circle cx="560" cy="340" r="1.5" fill={tertiaryText} />
-        <circle cx="480" cy="370" r="2" fill={textColor} />
-        <circle cx="320" cy="380" r="1.5" fill={secondaryText} />
-        <circle cx="240" cy="330" r="1" fill={tertiaryText} />
-        <circle cx="180" cy="270" r="2" fill={textColor} />
-
-        {/* Satellite 1: Operational Satellite */}
-        <g transform="translate(290, 160) rotate(25)">
-          <rect x="-6" y="-3" width="12" height="6" fill={cardFill} stroke={textColor} strokeWidth="0.8" />
-          <line x1="-15" y1="0" x2="-6" y2="0" stroke={amberColor} strokeWidth="0.8" />
-          <line x1="6" y1="0" x2="15" y2="0" stroke={amberColor} strokeWidth="0.8" />
-          <rect x="-15" y="-4" width="8" height="8" fill="none" stroke={amberColor} strokeWidth="0.6" />
-          <rect x="7" y="-4" width="8" height="8" fill="none" stroke={amberColor} strokeWidth="0.6" />
-        </g>
-
-        {/* Satellite 2: Zenit Rocket Body */}
-        <g transform="translate(515, 335) rotate(-35)">
-          <rect x="-12" y="-4" width="24" height="8" rx="2" fill={cardFill} stroke={textColor} strokeWidth="0.8" />
-          <line x1="-4" y1="-4" x2="-4" y2="4" stroke={strokeColor} strokeWidth="0.5" />
-          <line x1="4" y1="-4" x2="4" y2="4" stroke={strokeColor} strokeWidth="0.5" />
-          <polygon points="12,-4 16,-6 16,6 12,4" fill="none" stroke={textColor} strokeWidth="0.7" />
-          <text x="-25" y="16" fill={secondaryText} fontSize="7">SL-16 (9,000 KG)</text>
-        </g>
-
-        {/* Trajectory Arc A: Operational Sat */}
-        <path
-          d="M 220 320 Q 320 180 500 160"
-          stroke={textColor}
-          strokeWidth="1.2"
-          strokeDasharray="4 2"
-          fill="none"
-        />
-
-        {/* Trajectory Arc B: Cross-Track Derelict (Amber) */}
-        <path
-          d="M 520 100 Q 430 190 310 290"
-          stroke={amberColor}
-          strokeWidth="1.4"
-          fill="none"
-        />
-
-        {/* Conjunction Point */}
-        <g transform="translate(415, 195)">
-          <circle cx="0" cy="0" r="16" stroke={amberColor} strokeWidth="0.8" strokeDasharray="3 3" />
-          <circle cx="0" cy="0" r="8" fill={amberColor} fillOpacity="0.25" />
-          <circle cx="0" cy="0" r="3" fill={amberBright} />
-
-          {/* Caliper Leader Line */}
-          <line x1="8" y1="-8" x2="45" y2="-45" stroke={amberColor} strokeWidth="0.8" />
-          <line x1="45" y1="-45" x2="160" y2="-45" stroke={amberColor} strokeWidth="0.8" />
-
-          {/* Conjunction Metadata Card */}
-          <rect x="45" y="-72" width="165" height="42" fill={cardFill} stroke={amberColor} strokeWidth="0.8" rx="2" />
-          <text x="52" y="-58" fill={amberBright} fontSize="8.5" fontWeight="bold">
-            CONJUNCTION DETECTED • TCA
-          </text>
-          <text x="52" y="-46" fill={textColor} fontSize="7.5">
-            MISS: 112 M • V_REL: 14.2 KM/S
-          </text>
-          <text x="52" y="-36" fill={secondaryText} fontSize="7">
-            CONSEQUENCE SCORE: 94 / 100 (CRITICAL)
-          </text>
-        </g>
-
-        {/* Figure Caption */}
-        <g transform="translate(30, 440)">
-          <text x="0" y="0" fill={secondaryText} fontSize="8" letterSpacing="0.1em">
-            FIGURE 1.0 — ORBITAL SHELL ARCHITECTURE & CONJUNCTION GEOMETRY
-          </text>
-          <text x="0" y="14" fill={tertiaryText} fontSize="7">
-            PROPAGATION: SGP4 • SPACE-TRACK CONJUNCTION DATA MESSAGES
-          </text>
-        </g>
-      </svg>
+          {/* Caption */}
+          <g transform="translate(30, 460)">
+            <text x="0" y="0" fill="#71717a" fontSize="8" letterSpacing="0.08em">
+              FIGURE 1.0 — ORBITAL CONJUNCTION PHASING & CATALOG SITUATION
+            </text>
+          </g>
+        </svg>
+      </div>
     </div>
   );
 };

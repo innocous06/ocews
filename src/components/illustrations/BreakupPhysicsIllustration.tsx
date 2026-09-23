@@ -1,99 +1,146 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-interface BreakupPhysicsIllustrationProps {
-  theme?: 'light' | 'dark';
-}
+export const BreakupPhysicsIllustration: React.FC = () => {
+  const [specificEnergy, setSpecificEnergy] = useState<number>(65); // 5 to 120 J/g
 
-export const BreakupPhysicsIllustration: React.FC<BreakupPhysicsIllustrationProps> = ({ theme = 'dark' }) => {
-  const isLight = theme === 'light';
-  const textColor = isLight ? '#18181b' : '#fafafa';
-  const strokeColor = isLight ? '#71717a' : '#52525b';
-  const mutedText = isLight ? '#52525b' : '#71717a';
-  const amberColor = isLight ? '#d97706' : '#f59e0b';
-  const amberBright = isLight ? '#b45309' : '#fbbf24';
+  const isCatastrophic = specificEnergy >= 40; // NASA Breakup threshold: 40 J/g
+
+  // Estimated fragments based on energy regime
+  const estimatedFrags = isCatastrophic
+    ? Math.round(500 + Math.pow(specificEnergy / 40, 2) * 12500)
+    : Math.round((specificEnergy / 40) * 120);
 
   return (
-    <div className="border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-obsidian-950 rounded-xl p-5 sm:p-6 my-6 font-mono text-xs select-none shadow-sm transition-colors duration-200">
-      <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-2.5 mb-5">
-        <span className="text-amber-600 dark:text-amber-400 font-bold tracking-wide uppercase text-[11px]">
-          FORMULATION 02 • NASA STANDARD BREAKUP PHYSICS
+    <div className="border border-neutral-200 bg-white rounded-xl p-5 sm:p-6 my-6 font-mono text-xs select-none shadow-sm">
+      <div className="flex items-center justify-between border-b border-neutral-200 pb-2.5 mb-4">
+        <span className="text-amber-700 font-bold tracking-wide uppercase text-[11px]">
+          FORMULATION 02 • NASA STANDARD BREAKUP THRESHOLD
         </span>
-        <span className="text-neutral-500 text-[11px]">NASA-NSS-1740.14 CRITERIA</span>
+        <span className="text-neutral-500 text-[10px]">DRAG SLIDER ACROSS 40 J/G THRESHOLD</span>
+      </div>
+
+      {/* Interactive Specific Energy Slider */}
+      <div className="p-3.5 mb-5 bg-neutral-50 border border-neutral-200 rounded-lg space-y-1.5">
+        <div className="flex justify-between items-baseline">
+          <span className="text-neutral-600 font-medium">SPECIFIC IMPACT ENERGY (S = E_kin / M_total):</span>
+          <span className={`text-sm font-bold font-mono ${isCatastrophic ? 'text-rose-600' : 'text-neutral-700'}`}>
+            {specificEnergy} Joules / gram
+          </span>
+        </div>
+        <input
+          type="range"
+          min="5"
+          max="120"
+          step="1"
+          value={specificEnergy}
+          onChange={(e) => setSpecificEnergy(parseInt(e.target.value))}
+          className="w-full accent-amber-600 h-1 bg-neutral-200 rounded cursor-pointer"
+        />
+        <div className="flex justify-between text-[10px] text-neutral-500 pt-0.5">
+          <span>5 J/g (Minor cratering)</span>
+          <span className="font-bold text-amber-700">▲ 40 J/g NASA CRITICAL THRESHOLD</span>
+          <span>120 J/g (Total vaporization)</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-        {/* Math & Criteria */}
+        {/* Math & Regime Card */}
         <div className="space-y-3">
-          <div className="border border-neutral-100 dark:border-neutral-900 bg-neutral-50 dark:bg-[#020202] p-3.5 rounded-lg">
-            <div className="text-[10px] text-neutral-500 mb-1 tracking-wider uppercase">01. RELATIVE KINETIC ENERGY</div>
-            <div className="text-sm font-serif text-neutral-900 dark:text-neutral-100">
-              E_kin = ½ · [ (m₁ · m₂) / (m₁ + m₂) ] · v_rel²
+          <div className={`p-3.5 rounded-lg border transition-colors ${
+            isCatastrophic
+              ? 'bg-rose-50/70 border-rose-200 text-rose-950'
+              : 'bg-neutral-50 border-neutral-200 text-neutral-800'
+          }`}>
+            <div className="text-[10px] tracking-wider uppercase font-bold mb-1">
+              REGIME: {isCatastrophic ? '⚠️ CATASTROPHIC STRUCTURAL BREAKUP' : '✓ SUB-CATASTROPHIC (LOCALIZED CRATERING)'}
             </div>
-            <p className="text-[11px] text-neutral-600 dark:text-neutral-400 font-serif mt-1 leading-relaxed">
-              Reduced-mass kinetic energy at relative orbital hypervelocities (10–14 km/s in typical LEO cross-orbit encounters).
+            <div className="text-base font-serif font-bold">
+              {isCatastrophic ? 'Total Spacecraft Shatter' : 'Localized Perforation Only'}
+            </div>
+            <p className="text-[11px] font-serif mt-1 leading-relaxed text-neutral-600">
+              {isCatastrophic
+                ? `Specific energy (${specificEnergy} J/g) exceeds the 40 J/g NASA break-up limit. Shockwaves shatter internal bulkheads into ~${estimatedFrags.toLocaleString()} lethal trackable fragments.`
+                : `Specific energy (${specificEnergy} J/g) is below 40 J/g. The impact generates a localized puncture crater with only ~${estimatedFrags} localized dust ejecta.`}
             </p>
           </div>
 
-          <div className="border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-3.5 rounded-lg">
-            <div className="text-[10px] text-amber-700 dark:text-amber-400 mb-1 font-bold tracking-wider uppercase">
-              02. NASA CATASTROPHIC BREAKUP CRITERION
-            </div>
-            <div className="text-sm font-serif text-amber-700 dark:text-amber-300 font-medium">
-              Specific Energy S = E_kin / M_total ≥ 40 J/g (40,000 J/kg)
-            </div>
-            <p className="text-[11px] text-neutral-700 dark:text-neutral-300 font-serif mt-1 leading-relaxed">
-              When specific energy exceeds 40 J/g, target structure completely fragments into lethal shrapnel rather than localized cratering.
-            </p>
-          </div>
-
-          <div className="border border-neutral-100 dark:border-neutral-900 bg-neutral-50 dark:bg-[#020202] p-3.5 rounded-lg">
-            <div className="text-[10px] text-neutral-500 mb-1 tracking-wider uppercase">03. FRAGMENT GENERATION POWER-LAW</div>
-            <div className="text-sm font-serif text-neutral-900 dark:text-neutral-100">
+          <div className="border border-neutral-100 bg-neutral-50 p-3 rounded-lg text-[11px]">
+            <span className="text-neutral-500 block text-[10px] uppercase">NASA POWER-LAW ESTIMATION</span>
+            <div className="text-sm font-serif text-neutral-900 mt-0.5">
               N(d &gt; 10 cm) = 0.1 · (M_total)^0.75
             </div>
-            <p className="text-[11px] text-neutral-600 dark:text-neutral-400 font-serif mt-1 leading-relaxed">
-              Empirical power-law predicting the count of trackable shrapnel fragments capable of secondary catastrophic satellite destruction.
-            </p>
+            <span className="text-neutral-500 block mt-1 font-serif text-[10px]">
+              Predicted fragments: <strong>~{estimatedFrags.toLocaleString()} pieces &gt; 10 cm</strong>
+            </span>
           </div>
         </div>
 
-        {/* Minimal Vector Diagram */}
-        <div className="h-64 border border-neutral-100 dark:border-neutral-900 rounded-lg bg-neutral-50 dark:bg-[#020202] p-4 flex flex-col justify-between">
-          <div className="text-[10px] text-neutral-500 uppercase tracking-wider">
-            ENERGY PARTITION & DISPERSION ENVELOPE
+        {/* Dynamic Vector Drawing: Localized vs Shatter */}
+        <div className="h-64 border border-neutral-100 rounded-lg bg-neutral-50 p-4 flex flex-col justify-between">
+          <div className="flex justify-between items-center text-[10px] text-neutral-500 uppercase">
+            <span>PHYSICAL DISPERSION GEOMETRY</span>
+            <span className={isCatastrophic ? 'text-rose-600 font-bold' : 'text-neutral-600'}>
+              {isCatastrophic ? 'FULL DEBRIS CONE' : 'LOCALIZED EJECTA'}
+            </span>
           </div>
           
           <svg viewBox="0 0 320 180" className="w-full h-auto">
-            {/* Impact Center */}
-            <circle cx="60" cy="90" r="12" fill={amberColor} fillOpacity="0.2" stroke={amberColor} strokeWidth="0.8" />
-            <circle cx="60" cy="90" r="3" fill={textColor} />
-            <text x="35" y="120" fill={amberColor} fontSize="8">S ≥ 40 J/g</text>
+            {isCatastrophic ? (
+              // Catastrophic Regime: Expanding cone + shattered fragments
+              <g>
+                {/* Impact center */}
+                <circle cx="60" cy="90" r="14" fill="#d97706" fillOpacity="0.25" stroke="#d97706" strokeWidth="1" />
+                <circle cx="60" cy="90" r="3" fill="#18181b" />
+                <text x="35" y="120" fill="#d97706" fontSize="8" fontWeight="bold">S ≥ 40 J/g</text>
 
-            {/* Dispersion Angles */}
-            <line x1="60" y1="90" x2="280" y2="30" stroke={strokeColor} strokeWidth="0.8" strokeDasharray="3 3" />
-            <line x1="60" y1="90" x2="280" y2="150" stroke={strokeColor} strokeWidth="0.8" strokeDasharray="3 3" />
-            
-            {/* Cone Spread Fill */}
-            <polygon points="60,90 280,30 280,150" fill={amberColor} fillOpacity="0.04" />
+                {/* Cone Spread Fill */}
+                <polygon points="60,90 290,20 290,160" fill="#d97706" fillOpacity="0.08" />
+                <line x1="60" y1="90" x2="290" y2="20" stroke="#d97706" strokeWidth="0.8" strokeDasharray="3 3" />
+                <line x1="60" y1="90" x2="290" y2="160" stroke="#d97706" strokeWidth="0.8" strokeDasharray="3 3" />
 
-            {/* Velocity Vectors */}
-            <line x1="60" y1="90" x2="160" y2="65" stroke={textColor} strokeWidth="1.2" />
-            <line x1="60" y1="90" x2="180" y2="90" stroke={amberColor} strokeWidth="1.2" />
-            <line x1="60" y1="90" x2="150" y2="120" stroke={textColor} strokeWidth="1.2" />
+                {/* Velocity vectors */}
+                <line x1="60" y1="90" x2="160" y2="60" stroke="#18181b" strokeWidth="1.2" />
+                <line x1="60" y1="90" x2="180" y2="90" stroke="#d97706" strokeWidth="1.5" />
+                <line x1="60" y1="90" x2="150" y2="120" stroke="#18181b" strokeWidth="1.2" />
 
-            {/* Fragments */}
-            <circle cx="210" cy="60" r="1.5" fill={textColor} />
-            <circle cx="230" cy="85" r="2" fill={amberBright} />
-            <circle cx="205" cy="115" r="1.2" fill={textColor} />
-            <circle cx="250" cy="50" r="1.8" fill={amberColor} />
-            <circle cx="265" cy="100" r="2.2" fill={textColor} />
-            <circle cx="240" cy="130" r="1.5" fill={amberBright} />
+                {/* Dense shrapnel cloud */}
+                <circle cx="190" cy="55" r="2" fill="#18181b" />
+                <circle cx="210" cy="80" r="2.5" fill="#d97706" />
+                <circle cx="185" cy="110" r="1.5" fill="#18181b" />
+                <circle cx="240" cy="45" r="2" fill="#d97706" />
+                <circle cx="255" cy="95" r="2.5" fill="#18181b" />
+                <circle cx="230" cy="125" r="1.8" fill="#d97706" />
+                <circle cx="275" cy="70" r="2" fill="#18181b" />
+                <circle cx="280" cy="135" r="2.2" fill="#d97706" />
 
-            <text x="180" y="170" fill={mutedText} fontSize="7">EJECTION CONE (100–300 M/S ΔV)</text>
+                <text x="180" y="172" fill="#71717a" fontSize="7">EJECTION CONE (&gt;100 M/S ΔV)</text>
+              </g>
+            ) : (
+              // Sub-catastrophic Regime: Intact satellite with small dent
+              <g>
+                {/* Intact satellite bus */}
+                <rect x="110" y="60" width="70" height="60" rx="3" fill="#ffffff" stroke="#18181b" strokeWidth="1.5" />
+                <line x1="80" y1="90" x2="110" y2="90" stroke="#d97706" strokeWidth="1.5" />
+                <line x1="180" y1="90" x2="210" y2="90" stroke="#d97706" strokeWidth="1.5" />
+                <rect x="60" y="75" width="20" height="30" fill="#ffffff" stroke="#d97706" strokeWidth="0.8" />
+                <rect x="210" y="75" width="20" height="30" fill="#ffffff" stroke="#d97706" strokeWidth="0.8" />
+
+                {/* Localized puncture crater */}
+                <circle cx="110" cy="90" r="6" fill="#ef4444" fillOpacity="0.4" stroke="#ef4444" strokeWidth="1" />
+                <circle cx="110" cy="90" r="2" fill="#18181b" />
+
+                {/* Minimal ejecta */}
+                <circle cx="95" cy="80" r="1" fill="#71717a" />
+                <circle cx="90" cy="95" r="1.2" fill="#71717a" />
+                <circle cx="98" cy="105" r="1" fill="#71717a" />
+
+                <text x="115" y="145" fill="#71717a" fontSize="8">INTACT BUS • LOCALIZED PERFORATION</text>
+              </g>
+            )}
           </svg>
 
           <div className="text-[10px] text-neutral-500 text-right">
-            USSF ASTRODYNAMICS SPECIFICATION
+            NASA-NSS-1740.14 ASTRODYNAMICS MODEL
           </div>
         </div>
       </div>

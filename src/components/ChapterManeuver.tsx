@@ -1,25 +1,21 @@
 import React from 'react';
 import { ManeuverIllustration } from './illustrations/ManeuverIllustration';
 
-interface ChapterManeuverProps {
-  theme?: 'light' | 'dark';
-}
-
-export const ChapterManeuver: React.FC<ChapterManeuverProps> = ({ theme = 'dark' }) => {
+export const ChapterManeuver: React.FC = () => {
   return (
-    <section id="maneuver" className="py-12 border-t border-neutral-200 dark:border-neutral-900 max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="maneuver" className="py-12 border-t border-neutral-200 max-w-6xl mx-auto px-4 sm:px-6">
       {/* Chapter Marker */}
-      <div className="flex items-center gap-2 text-xs font-mono text-amber-600 dark:text-amber-400 mb-2">
+      <div className="flex items-center gap-2 text-xs font-mono text-amber-700 mb-2">
         <span className="font-bold">05</span>
         <span>/</span>
         <span className="uppercase tracking-widest">ACTIONABLE ASTRODYNAMICS</span>
       </div>
 
-      <h2 className="text-2xl sm:text-4xl font-serif text-neutral-900 dark:text-neutral-100 max-w-3xl leading-snug">
+      <h2 className="text-2xl sm:text-4xl font-serif text-neutral-900 max-w-3xl leading-snug">
         Avoidance maneuver verification & orbital phasing.
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-6 text-sm text-neutral-600 dark:text-neutral-400 font-serif leading-relaxed">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-6 text-sm text-neutral-600 font-serif leading-relaxed">
         <div>
           <p className="mb-4">
             Identifying a high-consequence conjunction is only half the battle. When an alert is validated as critical, satellite flight operations teams must verify whether a minor propulsion burn can resolve the threat without putting other orbital assets at risk.
@@ -38,8 +34,8 @@ export const ChapterManeuver: React.FC<ChapterManeuverProps> = ({ theme = 'dark'
         </div>
       </div>
 
-      {/* Maneuver Illustration */}
-      <ManeuverIllustration theme={theme} />
+      {/* Interactive Maneuver Illustration */}
+      <ManeuverIllustration />
     </section>
   );
 };

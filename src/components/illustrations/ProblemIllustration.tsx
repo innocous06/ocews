@@ -1,94 +1,179 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-interface ProblemIllustrationProps {
-  theme?: 'light' | 'dark';
-}
+export const ProblemIllustration: React.FC = () => {
+  const [velocityKms, setVelocityKms] = useState<number>(14.2); // 4 to 16 km/s
+  const [impactorMassKg, setImpactorMassKg] = useState<number>(9000); // 500 to 9000 kg
 
-export const ProblemIllustration: React.FC<ProblemIllustrationProps> = ({ theme = 'dark' }) => {
-  const isLight = theme === 'light';
+  // Kinetic energy calculation: E_k = 0.5 * mu * v^2
+  const targetMassKg = 150; // Satellite mass
+  const reducedMassKg = (targetMassKg * impactorMassKg) / (targetMassKg + impactorMassKg);
+  const kineticEnergyGJ = parseFloat((0.5 * reducedMassKg * Math.pow(velocityKms * 1000, 2) / 1e9).toFixed(2));
+  
+  // Predicted fragments: N = 0.1 * M^0.75
+  const predictedFrags = Math.round(1.2 * Math.pow(impactorMassKg + targetMassKg, 0.75));
 
-  const strokeColor = isLight ? '#71717a' : '#a1a1aa';
-  const textColor = isLight ? '#18181b' : '#fafafa';
-  const mutedText = isLight ? '#71717a' : '#a1a1aa';
-  const amberColor = isLight ? '#d97706' : '#f59e0b';
-  const amberBright = isLight ? '#b45309' : '#fbbf24';
-  const cardFill = isLight ? '#ffffff' : '#18181b';
+  // Dynamic cone height based on velocity (higher velocity = wider dispersion)
+  const coneHalfSpread = Math.min(95, 30 + (velocityKms / 16) * 60);
+
+  // Generate dynamic fragments based on mass
+  const fragCount = Math.min(32, Math.max(8, Math.round(impactorMassKg / 300)));
+  const dynamicShrapnel = Array.from({ length: fragCount }, (_, i) => {
+    const spreadFraction = ((i + 1) / (fragCount + 1)) * 2 - 1; // -1 to 1
+    const x = 300 + (i * 11) % 320;
+    const y = 120 + spreadFraction * (coneHalfSpread * 0.85);
+    const r = i % 4 === 0 ? 2 : 1.2;
+    return { x, y, r, isSecondary: i % 5 === 0 };
+  });
 
   return (
-    <div className="w-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-obsidian-950 rounded-xl p-5 my-6 overflow-hidden select-none font-mono shadow-sm transition-colors duration-200">
-      <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800 pb-2 mb-4">
-        <span className="text-amber-600 dark:text-amber-400 font-semibold tracking-wide">
+    <div className="w-full border border-neutral-200 bg-white rounded-xl p-5 my-6 overflow-hidden select-none font-mono shadow-sm">
+      <div className="flex items-center justify-between text-xs text-neutral-600 border-b border-neutral-200 pb-2.5 mb-4">
+        <span className="text-amber-700 font-bold tracking-wide uppercase text-[11px]">
           DIAGRAM 01 • THE KESSLER CASCADE MECHANISM
         </span>
-        <span className="text-neutral-500">HYPERVELOCITY BREAKUP REGIME (&gt;10 KM/S)</span>
+        <span className="text-neutral-500 text-[10px]">PARAMETRIC BREAKUP SIMULATION</span>
       </div>
 
+      {/* Interactive Parameter Sliders */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 mb-4 border-b border-neutral-100 text-[11px]">
+        {/* Velocity Slider */}
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <span className="text-neutral-500">RELATIVE IMPACT SPEED (v_rel):</span>
+            <span className="text-amber-700 font-bold">{velocityKms.toFixed(1)} km/s</span>
+          </div>
+          <input
+            type="range"
+            min="4.0"
+            max="16.0"
+            step="0.2"
+            value={velocityKms}
+            onChange={(e) => setVelocityKms(parseFloat(e.target.value))}
+            className="w-full accent-amber-600 h-1 bg-neutral-200 rounded cursor-pointer"
+          />
+          <div className="flex justify-between text-[10px] text-neutral-400">
+            <span>4.0 km/s (Co-planar)</span>
+            <span>10.0 km/s</span>
+            <span>16.0 km/s (Retrograde)</span>
+          </div>
+        </div>
+
+        {/* Impactor Mass Slider */}
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <span className="text-neutral-500">DERELICT IMPACTER MASS:</span>
+            <span className="text-neutral-800 font-bold">{impactorMassKg.toLocaleString()} kg</span>
+          </div>
+          <input
+            type="range"
+            min="500"
+            max="9000"
+            step="250"
+            value={impactorMassKg}
+            onChange={(e) => setImpactorMassKg(parseInt(e.target.value))}
+            className="w-full accent-neutral-800 h-1 bg-neutral-200 rounded cursor-pointer"
+          />
+          <div className="flex justify-between text-[10px] text-neutral-400">
+            <span>500 kg (Small upper stage)</span>
+            <span>4,500 kg</span>
+            <span>9,000 kg (Zenit SL-16)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Reactive Output Metrics Bar */}
+      <div className="grid grid-cols-3 gap-2 py-2 px-3 mb-4 bg-neutral-50 border border-neutral-200 rounded-lg text-center text-xs">
+        <div>
+          <span className="text-neutral-500 block text-[10px] uppercase">KINETIC ENERGY</span>
+          <span className="font-bold text-neutral-900">{kineticEnergyGJ} GJ</span>
+        </div>
+        <div>
+          <span className="text-neutral-500 block text-[10px] uppercase">LETHAL SHRAPNEL COUNT</span>
+          <span className="font-bold text-amber-700">~{predictedFrags.toLocaleString()} frags</span>
+        </div>
+        <div>
+          <span className="text-neutral-500 block text-[10px] uppercase">CASCADE REGIME</span>
+          <span className="font-bold text-rose-600">
+            {kineticEnergyGJ > 8 ? 'CATASTROPHIC' : 'HYPERVELOCITY'}
+          </span>
+        </div>
+      </div>
+
+      {/* Dynamic SVG Vector Drawing */}
       <svg viewBox="0 0 700 240" className="w-full h-auto text-xs" fill="none">
         {/* Orbital trajectory lines */}
-        <line x1="40" y1="80" x2="260" y2="120" stroke={strokeColor} strokeWidth="1" strokeDasharray="4 3" />
-        <line x1="260" y1="40" x2="260" y2="200" stroke={amberColor} strokeWidth="1.2" />
+        <line x1="40" y1="80" x2="260" y2="120" stroke="#a1a1aa" strokeWidth="1" strokeDasharray="4 3" />
+        <line x1="260" y1="40" x2="260" y2="200" stroke="#d97706" strokeWidth="1.2" />
 
         {/* Target Payload */}
         <g transform="translate(140, 98)">
-          <rect x="-6" y="-3" width="12" height="6" fill={cardFill} stroke={textColor} strokeWidth="0.8" />
-          <line x1="-10" y1="0" x2="-6" y2="0" stroke={strokeColor} />
-          <line x1="6" y1="0" x2="10" y2="0" stroke={strokeColor} />
-          <text x="-24" y="-8" fill={mutedText} fontSize="8">ACTIVE ASSET</text>
+          <rect x="-6" y="-3" width="12" height="6" fill="#ffffff" stroke="#18181b" strokeWidth="0.8" />
+          <line x1="-10" y1="0" x2="-6" y2="0" stroke="#71717a" />
+          <line x1="6" y1="0" x2="10" y2="0" stroke="#71717a" />
+          <text x="-24" y="-8" fill="#71717a" fontSize="8">ACTIVE ASSET</text>
         </g>
 
         {/* Incoming Derelict Rocket Body */}
         <g transform="translate(260, 65)">
-          <rect x="-4" y="-10" width="8" height="20" rx="1" fill={cardFill} stroke={amberColor} strokeWidth="0.8" />
-          <text x="12" y="2" fill={amberBright} fontSize="8">DERELICT (9,000 KG)</text>
-          <line x1="0" y1="12" x2="0" y2="28" stroke={amberColor} strokeWidth="1" />
+          <rect
+            x={-Math.min(6, 2 + impactorMassKg / 2000)}
+            y="-10"
+            width={Math.min(12, 4 + impactorMassKg / 1000)}
+            height="20"
+            rx="1"
+            fill="#ffffff"
+            stroke="#d97706"
+            strokeWidth="1"
+          />
+          <text x="12" y="2" fill="#d97706" fontSize="8" fontWeight="bold">
+            DERELICT ({impactorMassKg.toLocaleString()} KG)
+          </text>
+          <line x1="0" y1="12" x2="0" y2="28" stroke="#d97706" strokeWidth="1" />
         </g>
 
         {/* Collision Point */}
         <g transform="translate(260, 120)">
-          <circle cx="0" cy="0" r="18" stroke={amberColor} strokeWidth="0.8" strokeDasharray="2 2" />
-          <circle cx="0" cy="0" r="8" fill={amberColor} fillOpacity="0.25" />
-          <circle cx="0" cy="0" r="2.5" fill={textColor} />
-          <text x="-70" y="28" fill={amberColor} fontSize="8" fontWeight="bold">HYPERVELOCITY IMPACT</text>
-          <text x="-70" y="38" fill={mutedText} fontSize="7.5">v_rel = 14.2 km/s (14.8 GJ)</text>
+          <circle cx="0" cy="0" r="18" stroke="#d97706" strokeWidth="0.8" strokeDasharray="2 2" />
+          <circle cx="0" cy="0" r={Math.min(12, 4 + velocityKms / 2)} fill="#d97706" fillOpacity="0.25" />
+          <circle cx="0" cy="0" r="2.5" fill="#18181b" />
+          <text x="-85" y="28" fill="#d97706" fontSize="8" fontWeight="bold">IMPACT: {kineticEnergyGJ} GJ</text>
+          <text x="-85" y="38" fill="#71717a" fontSize="7.5">v_rel = {velocityKms} km/s</text>
         </g>
 
-        {/* Expanding Breakup Cone Envelope */}
-        <path d="M 260 120 L 640 40 L 640 200 Z" fill={amberColor} fillOpacity="0.05" stroke={amberColor} strokeWidth="0.5" strokeDasharray="3 3" />
+        {/* Dynamic Expanding Breakup Cone Envelope */}
+        <path
+          d={`M 260 120 L 640 ${120 - coneHalfSpread} L 640 ${120 + coneHalfSpread} Z`}
+          fill="#d97706"
+          fillOpacity="0.05"
+          stroke="#d97706"
+          strokeWidth="0.8"
+          strokeDasharray="3 3"
+        />
 
-        {/* Shrapnel Field */}
+        {/* Dynamic Shrapnel Particles */}
         <g>
-          <circle cx="310" cy="115" r="1.5" fill={textColor} />
-          <circle cx="330" cy="95" r="1" fill={amberColor} />
-          <circle cx="340" cy="135" r="2" fill={textColor} />
-          <circle cx="370" cy="105" r="1.5" fill={mutedText} />
-          <circle cx="380" cy="145" r="1.2" fill={amberColor} />
-          <circle cx="410" cy="80" r="1.8" fill={textColor} />
-          <circle cx="420" cy="120" r="2" fill={amberColor} />
-          <circle cx="430" cy="165" r="1.5" fill={mutedText} />
-
-          <circle cx="480" cy="65" r="1" fill={amberColor} />
-          <circle cx="500" cy="110" r="2" fill={textColor} />
-          <circle cx="515" cy="150" r="1.5" fill={amberBright} />
-          <circle cx="530" cy="85" r="1.2" fill={mutedText} />
-          <circle cx="545" cy="180" r="1.8" fill={textColor} />
-          <circle cx="580" cy="55" r="1.5" fill={amberColor} />
-          <circle cx="595" cy="100" r="2" fill={textColor} />
-          <circle cx="610" cy="135" r="1.5" fill={amberBright} />
-          <circle cx="620" cy="175" r="1" fill={mutedText} />
-          <circle cx="635" cy="195" r="1.8" fill={textColor} />
+          {dynamicShrapnel.map((s, idx) => (
+            <circle
+              key={idx}
+              cx={s.x}
+              cy={s.y}
+              r={s.r}
+              fill={s.isSecondary ? '#dc2626' : '#18181b'}
+            />
+          ))}
         </g>
 
-        {/* Downstream Impact Strike */}
+        {/* Downstream Secondary Collision Strike */}
         <g transform="translate(540, 115)">
           <circle cx="0" cy="0" r="8" stroke="#ef4444" strokeWidth="0.8" strokeDasharray="2 2" />
-          <rect x="-4" y="-2" width="8" height="4" fill={cardFill} stroke="#ef4444" strokeWidth="0.6" />
-          <text x="12" y="2" fill="#ef4444" fontSize="7.5">SECONDARY STRIKE (CASCADE)</text>
+          <rect x="-4" y="-2" width="8" height="4" fill="#ffffff" stroke="#ef4444" strokeWidth="0.6" />
+          <text x="12" y="2" fill="#ef4444" fontSize="7.5" fontWeight="bold">SECONDARY STRIKE (CASCADE)</text>
         </g>
 
         {/* Summary Caption */}
-        <g transform="translate(430, 225)">
-          <text x="0" y="0" fill={mutedText} fontSize="8">
-            RESULT: 14,000+ LETHAL FRAGMENTS (&gt;10CM) • LIFETIME: 160+ YEARS
+        <g transform="translate(420, 225)">
+          <text x="0" y="0" fill="#71717a" fontSize="8">
+            RESULT: ~{predictedFrags.toLocaleString()} SHRAPNEL PIECES • DISPERSION ANGLE: ±{Math.round(coneHalfSpread / 2)}°
           </text>
         </g>
       </svg>
