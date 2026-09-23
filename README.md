@@ -10,7 +10,7 @@
 
 ---
 
-## 🛰️ 1. Executive Summary & Problem Statement
+##  1. Executive Summary & Problem Statement
 
 Over **40,000 tracked objects** and millions of untracked fragments circle the Earth. As mega-constellations expand, satellite operators receive hundreds of Conjunction Data Messages (CDMs) weekly via public feeds (Space-Track / CelesTrak). 
 
@@ -24,7 +24,7 @@ Over **40,000 tracked objects** and millions of untracked fragments circle the E
 
 ---
 
-## 🔬 2. Physics-Grounded Scoring Logic
+##  2. Physics-Grounded Scoring Logic
 
 Rather than training an un-auditable "black box" ML model on single-digit historic collisions (Iridium-Kosmos), OCEWS employs a **transparent, defensible, physics-based scoring model** based on NASA and US Space Force orbital mechanics standards:
 
@@ -50,7 +50,7 @@ Quantifies the local spatial density in the $\pm 25\text{ km}$ altitude bin. Enc
 
 ---
 
-## 📊 3. Core Features in This Demo
+##  3. Core Features in This Demo
 
 1. **Before & After Ranking Comparison Toggle:**
    - **Traditional View ($P_c$ Only):** See how current industry tools place harmless CubeSats at #1 and bury multi-ton rocket bodies.
@@ -72,7 +72,7 @@ Quantifies the local spatial density in the $\pm 25\text{ km}$ altitude bin. Enc
 
 ---
 
-## 🛠️ 4. System Processing Pipeline
+##  4. System Processing Pipeline
 
 ```
   [01: Ingest]                [02: Filter]               [03: Propagate]              [04: Score & Rank]
@@ -83,7 +83,7 @@ Daily TLE Ephemeris           Apogee/Perigee Sifting     Miss Distance & TCA    
 
 ---
 
-## 🚀 5. Local Setup & Deployment
+##  5. Local Setup & Deployment
 
 ### Quick Start
 ```bash
