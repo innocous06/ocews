@@ -4,37 +4,37 @@
 
 @layer base {
   body {
-    @apply bg-[#070b14] text-slate-100 font-sans;
-    background-image: 
-      radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 10% 40%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+    @apply bg-[#050505] text-[#ededed] font-sans selection:bg-amber-400 selection:text-black;
+  }
+
+  h1, h2, h3, .font-serif-title {
+    letter-spacing: -0.015em;
   }
 }
 
-/* Custom crisp scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0c1322;
-}
-::-webkit-scrollbar-thumb {
-  background: #1e3056;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #38bdf8;
+/* Subtle editorial paper grain & rule lines */
+.editorial-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12) 15%, rgba(255, 255, 255, 0.12) 85%, transparent);
 }
 
-/* Glow effects */
-.glow-cyan {
-  box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.25);
+.editorial-rule-amber {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.3) 15%, rgba(245, 158, 11, 0.3) 85%, transparent);
 }
-.glow-rose {
-  box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.35);
+
+/* Custom minimal scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
-.glow-amber {
-  box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.3);
+::-webkit-scrollbar-track {
+  background: #070708;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d97706;
 }
